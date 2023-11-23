@@ -15,15 +15,16 @@ services:
       dockerfile: Dockerfile
     volumes:
       - huggingface:/root/.cache/huggingface
+      - /data/ml/llm:/data/ml/llm
     image: fastchat:latest
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
+              count: 2
               capabilities: [gpu]
-    entrypoint: ["python3.9", "-m", "fastchat.serve.model_worker", "--model-names", "${FASTCHAT_WORKER_MODEL_NAMES:-vicuna-7b-v1.5}", "--model-path", "${FASTCHAT_WORKER_MODEL_PATH:-lmsys/vicuna-7b-v1.5}", "--worker-address", "http://fastchat-model-worker:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
+    entrypoint: ["python3.9", "-m", "fastchat.serve.model_worker", "--num-gpus", "2", "--model-path", "/data/ml/llm/Mistral-7B-Instruct-v0.1", "--worker-address", "http://fastchat-model-worker:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
   fastchat-api-server:
     build:
       context: .
