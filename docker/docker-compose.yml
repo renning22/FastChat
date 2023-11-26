@@ -24,7 +24,7 @@ services:
             - driver: nvidia
               count: 2
               capabilities: [gpu]
-    entrypoint: ["python3.9", "-m", "fastchat.serve.model_worker", "--num-gpus", "2", "--model-path", "/data/ml/llm/Mistral-7B-Instruct-v0.1", "--worker-address", "http://fastchat-model-worker:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
+    entrypoint: ["python3.9", "-m", "fastchat.serve.model_worker", "--num-gpus", "2", "--model-path", "/data/ml/llm/OpenHermes-2.5-Mistral-7B", "--worker-address", "http://fastchat-model-worker:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
   fastchat-api-server:
     build:
       context: .
