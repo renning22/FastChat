@@ -788,9 +788,6 @@ async def create_chat_completion(request: APIChatCompletionRequest):
         stop=request.stop,
     )
 
-
-    logger.info(f"!!!!!!!!!!\n {gen_params}")
-
     if request.repetition_penalty is not None:
         gen_params["repetition_penalty"] = request.repetition_penalty
 
