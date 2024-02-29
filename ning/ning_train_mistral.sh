@@ -1,6 +1,6 @@
-torchrun --nproc_per_node=6 --master_port=20001 fastchat/train/train_mem.py \
+torchrun --nproc_per_node=6 --master_port=20001 ../fastchat/train/train_mem.py \
     --model_name_or_path mistralai/Mistral-7B-Instruct-v0.2 \
-    --data_path data/dummy_conversation.json \
+    --data_path ../data/dummy_conversation.json \
     --output_dir output_mistral \
     --num_train_epochs 3 \
     --per_device_train_batch_size 2 \
@@ -20,4 +20,4 @@ torchrun --nproc_per_node=6 --master_port=20001 fastchat/train/train_mem.py \
     --tf32 True \
     --model_max_length 2048 \
     --gradient_checkpointing True \
-    --lazy_preprocess True
+    --lazy_preprocess False

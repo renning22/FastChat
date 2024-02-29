@@ -93,7 +93,7 @@ def preprocess(
     sources,
     tokenizer: transformers.PreTrainedTokenizer,
 ) -> Dict:
-    conv = get_conversation_template("vicuna")
+    conv = get_conversation_template("mistral")
     roles = {"human": conv.roles[0], "gpt": conv.roles[1]}
 
     # Apply prompt templates
@@ -110,6 +110,9 @@ def preprocess(
             conv.append_message(role, sentence["value"])
         conversations.append(conv.get_prompt())
 
+    rank0_print('111111')
+    rank0_print(conversations[:3])
+
     # Tokenize conversations
     input_ids = tokenizer(
         conversations,
@@ -120,7 +123,14 @@ def preprocess(
     ).input_ids
     targets = input_ids.clone()
 
-    assert conv.sep_style == SeparatorStyle.ADD_COLON_TWO
+    rank0_print('222222')
+    rank0_print(conv)
+
+    rank0_print('333333')
+    rank0_print(targets.shape)
+    rank0_print(targets)
+
+    # assert conv.sep_style == SeparatorStyle.ADD_COLON_TWO
 
     # Mask targets. Only compute loss on the assistant outputs.
     sep = conv.sep + conv.roles[1] + ": "

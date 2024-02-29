@@ -1,6 +1,6 @@
-torchrun --nproc_per_node=4 --master_port=20001 fastchat/train/train_mem.py \
+torchrun --nproc_per_node=4 --master_port=20001 ../fastchat/train/train_mem.py \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
-    --data_path data/dummy_conversation.json \
+    --data_path ../data/dummy_conversation.json \
     --output_dir output_vicuna \
     --num_train_epochs 3 \
     --per_device_train_batch_size 1 \
