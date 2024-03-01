@@ -93,7 +93,11 @@ def preprocess(
     sources,
     tokenizer: transformers.PreTrainedTokenizer,
 ) -> Dict:
-    conv = get_conversation_template("mistral")
+    if 'gemma-7b-it' in tokenizer.name_or_path:
+        conv = get_conversation_template("gemma")
+    else:
+        conv = get_conversation_template("vicuna")
+
     roles = {"human": conv.roles[0], "gpt": conv.roles[1]}
 
     # Apply prompt templates
@@ -110,8 +114,9 @@ def preprocess(
             conv.append_message(role, sentence["value"])
         conversations.append(conv.get_prompt())
 
-    rank0_print('111111')
-    rank0_print(conversations[:3])
+    for i in range(5):
+        rank0_print()
+        rank0_print(conversations[i])
 
     # Tokenize conversations
     input_ids = tokenizer(
@@ -123,14 +128,67 @@ def preprocess(
     ).input_ids
     targets = input_ids.clone()
 
-    rank0_print('222222')
-    rank0_print(conv)
-
     rank0_print('333333')
     rank0_print(targets.shape)
-    rank0_print(targets)
+    rank0_print(list(targets.cpu().numpy()[0]))
 
-    # assert conv.sep_style == SeparatorStyle.ADD_COLON_TWO
+    if 'gemma-7b-it' in tokenizer.name_or_path:
+        assert conv.sep_style == SeparatorStyle.NO_COLON_SINGLE
+    else:
+        assert conv.sep_style == SeparatorStyle.ADD_COLON_TWO
+
+    if 'gemma-7b-it' in tokenizer.name_or_path:
+        # Mask targets. Only compute loss on the assistant outputs.
+        sep = conv.roles[1]
+        for conversation, target in zip(conversations, targets):
+            total_len = int(target.ne(tokenizer.pad_token_id).sum())
+
+            turns = conversation.split(conv.sep)
+            cur_len = 1
+            target[:cur_len] = IGNORE_TOKEN_ID
+
+            for i, turn in enumerate(turns):
+                if turn == "":
+                    break
+                
+                turn_full = turn + conv.sep
+                turn_input_ids = tokenizer(turn_full).input_ids
+                
+                turn_len = len(turn_input_ids) - 1  # -1 to remove the new <bos>
+
+                if turn_full.startswith(conv.roles[0]):
+                    # Ignore the user instructions
+                    target[cur_len : cur_len + turn_len] = IGNORE_TOKEN_ID
+                else:
+                    assert turn_full.startswith(conv.roles[1])
+
+                cur_len += turn_len
+
+            target[cur_len:] = IGNORE_TOKEN_ID
+
+            if False:  # Inspect and check the correctness of masking
+                z = target.clone()
+                z = torch.where(z == IGNORE_TOKEN_ID, tokenizer.unk_token_id, z)
+                rank0_print(tokenizer.decode(z))
+                exit()
+
+            if cur_len < tokenizer.model_max_length:
+                if cur_len != total_len:
+                    target[:] = IGNORE_TOKEN_ID
+                    rank0_print(
+                        f"WARNING: tokenization mismatch: {cur_len} vs. {total_len}."
+                        f" #turn = {len(turns) - 1}. (ignored)"
+                    )
+
+        rank0_print('444444')
+        rank0_print(targets.shape)
+        rank0_print(list(targets.cpu().numpy()[0]))
+
+        return dict(
+            input_ids=input_ids,
+            labels=targets,
+            attention_mask=input_ids.ne(tokenizer.pad_token_id),
+        )
 
     # Mask targets. Only compute loss on the assistant outputs.
     sep = conv.sep + conv.roles[1] + ": "

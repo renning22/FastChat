@@ -1584,7 +1584,6 @@ register_conv_template(
 register_conv_template(
     Conversation(
         name="gemma",
-        system_message="<bos>",
         roles=("<start_of_turn>user\n", "<start_of_turn>model\n"),
         sep_style=SeparatorStyle.NO_COLON_SINGLE,
         sep="<end_of_turn>\n",
