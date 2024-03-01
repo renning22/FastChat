@@ -139,6 +139,7 @@ def preprocess(
 
     if 'gemma-7b-it' in tokenizer.name_or_path:
         # Mask targets. Only compute loss on the assistant outputs.
+        model_role_prefix_input_ids = tokenizer(conv.roles[1]).input_ids
         sep = conv.roles[1]
         for conversation, target in zip(conversations, targets):
             total_len = int(target.ne(tokenizer.pad_token_id).sum())
@@ -153,15 +154,14 @@ def preprocess(
                 
                 turn_full = turn + conv.sep
                 turn_input_ids = tokenizer(turn_full).input_ids
-                
                 turn_len = len(turn_input_ids) - 1  # -1 to remove the new <bos>
-
                 if turn_full.startswith(conv.roles[0]):
-                    # Ignore the user instructions
+                    # Ignore the entire user instructions
                     target[cur_len : cur_len + turn_len] = IGNORE_TOKEN_ID
                 else:
                     assert turn_full.startswith(conv.roles[1])
-
+                    # Ignore "<start_of_turn>model\n"
+                    target[cur_len : cur_len + len(model_role_prefix_input_ids) - 1] = IGNORE_TOKEN_ID
                 cur_len += turn_len
 
             target[cur_len:] = IGNORE_TOKEN_ID
@@ -169,8 +169,9 @@ def preprocess(
             if False:  # Inspect and check the correctness of masking
                 z = target.clone()
                 z = torch.where(z == IGNORE_TOKEN_ID, tokenizer.unk_token_id, z)
-                rank0_print(tokenizer.decode(z))
-                exit()
+                rank0_print(tokenizer.decode(z)[1:200])
+                if 'Tell me about yourself.' in conversation:
+                    exit()
 
             if cur_len < tokenizer.model_max_length:
                 if cur_len != total_len:
