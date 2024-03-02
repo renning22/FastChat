@@ -100,20 +100,39 @@ def preprocess(
 
     roles = {"human": conv.roles[0], "gpt": conv.roles[1]}
 
-    # Apply prompt templates
-    conversations = []
-    for i, source in enumerate(sources):
-        if roles[source[0]["from"]] != conv.roles[0]:
-            # Skip the first one if it is not from human
-            source = source[1:]
+    if 'gemma-7b-it' in tokenizer.name_or_path:
+        # Apply prompt templates
+        conversations = []
+        for i, source in enumerate(sources):
+            if roles[source[0]["from"]] != conv.roles[0]:
+                # Skip the first one if it is not from human
+                source = source[1:]
 
-        conv.messages = []
-        for j, sentence in enumerate(source):
-            role = roles[sentence["from"]]
-            assert role == conv.roles[j % 2], f"{i}"
-            conv.append_message(role, sentence["value"])
-        conversations.append(conv.get_prompt())
+            conv.messages = []
+            for j, sentence in enumerate(source):
+                role = roles[sentence["from"]]
+                assert role == conv.roles[j % 2], f"{i}"
+                text = sentence["value"]
+                if role == conv.roles[1]:
+                    text += '<eos>'
+                conv.append_message(role, text)
+            conversations.append(conv.get_prompt())
+    else:
+        # Apply prompt templates
+        conversations = []
+        for i, source in enumerate(sources):
+            if roles[source[0]["from"]] != conv.roles[0]:
+                # Skip the first one if it is not from human
+                source = source[1:]
 
+            conv.messages = []
+            for j, sentence in enumerate(source):
+                role = roles[sentence["from"]]
+                assert role == conv.roles[j % 2], f"{i}"
+                conv.append_message(role, sentence["value"])
+            conversations.append(conv.get_prompt())
+
+    ### Debug
     for i in range(5):
         rank0_print()
         rank0_print(conversations[i])
@@ -128,6 +147,7 @@ def preprocess(
     ).input_ids
     targets = input_ids.clone()
 
+    ### Debug
     rank0_print('333333')
     rank0_print(targets.shape)
     rank0_print(list(targets.cpu().numpy()[0]))
