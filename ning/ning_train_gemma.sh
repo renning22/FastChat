@@ -1,7 +1,7 @@
 torchrun --nproc_per_node=6 --master_port=20001 ../fastchat/train/train_mem.py \
     --model_name_or_path google/gemma-7b-it \
-    --data_path data/nectar_1k.json \
-    --output_dir output_gemma \
+    --data_path data/nectar_5k.json \
+    --output_dir gemma_nectar_5k_1 \
     --num_train_epochs 3 \
     --per_device_train_batch_size 2 \
     --per_device_eval_batch_size 1 \
@@ -18,7 +18,7 @@ torchrun --nproc_per_node=6 --master_port=20001 ../fastchat/train/train_mem.py \
     --fsdp "full_shard auto_wrap offload" \
     --fsdp_transformer_layer_cls_to_wrap 'GemmaDecoderLayer' \
     --bf16 True \
-    --tf32 True \
+    --tf32 False \
     --model_max_length 2048 \
     --gradient_checkpointing True \
     --lazy_preprocess False

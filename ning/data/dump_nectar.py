@@ -7,7 +7,7 @@ dataset = load_dataset("berkeley-nest/Nectar")
 
 results = []
 
-for i in range(1000):
+for i in range(5000):
     entry = dataset['train'][i]
 
     prompt = entry['prompt'].strip().removeprefix('Human:').strip().removesuffix('Assistant:').strip()
@@ -37,7 +37,7 @@ for i in range(1000):
     }
     results.append(result)
 
-filename = "nectar_small.json"
+filename = "nectar_5k.json"
 print(f'Dumping to {filename}')
 with open(filename, "w") as outfile:
     json.dump(results, outfile, indent = '  ')
