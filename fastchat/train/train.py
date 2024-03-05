@@ -93,14 +93,14 @@ def preprocess(
     sources,
     tokenizer: transformers.PreTrainedTokenizer,
 ) -> Dict:
-    if 'gemma-7b-it' in tokenizer.name_or_path:
+    if 'gemma-' in tokenizer.name_or_path:
         conv = get_conversation_template("gemma")
     else:
         conv = get_conversation_template("vicuna")
 
     roles = {"human": conv.roles[0], "gpt": conv.roles[1]}
 
-    if 'gemma-7b-it' in tokenizer.name_or_path:
+    if 'gemma-' in tokenizer.name_or_path:
         # Apply prompt templates
         conversations = []
         for i, source in enumerate(sources):
@@ -152,12 +152,12 @@ def preprocess(
     rank0_print(targets.shape)
     rank0_print(list(targets.cpu().numpy()[0]))
 
-    if 'gemma-7b-it' in tokenizer.name_or_path:
+    if 'gemma-' in tokenizer.name_or_path:
         assert conv.sep_style == SeparatorStyle.NO_COLON_SINGLE
     else:
         assert conv.sep_style == SeparatorStyle.ADD_COLON_TWO
 
-    if 'gemma-7b-it' in tokenizer.name_or_path:
+    if 'gemma-' in tokenizer.name_or_path:
         # Mask targets. Only compute loss on the assistant outputs.
         model_role_prefix_input_ids = tokenizer(conv.roles[1]).input_ids
         sep = conv.roles[1]

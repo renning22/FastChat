@@ -1,1 +1,1 @@
-python3 -m fastchat.serve.cli --model-path ./output_gemma --num-gpus 1
+python3 -m fastchat.serve.cli --model-path /data/ning/gemma_2b_nectar_20k_1 --num-gpus 1
