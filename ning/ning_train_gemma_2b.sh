@@ -19,6 +19,6 @@ torchrun --nproc_per_node=6 --master_port=20001 ../fastchat/train/train_mem.py \
     --fsdp_transformer_layer_cls_to_wrap 'GemmaDecoderLayer' \
     --bf16 True \
     --tf32 False \
-    --model_max_length 2500 \
+    --model_max_length 2048 \
     --gradient_checkpointing True \
     --lazy_preprocess False
