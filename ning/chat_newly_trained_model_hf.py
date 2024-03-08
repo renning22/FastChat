@@ -10,5 +10,5 @@ model = AutoModelForCausalLM.from_pretrained("/data/ning/gemma_2b_nectar_20k_1",
 input_text = "List all heros in dota 2."
 input_ids = tokenizer(input_text, return_tensors="pt").to("cuda")
 
-outputs = model.generate(max_length = 512, **input_ids)
+outputs = model.generate(max_length = 2048, **input_ids, do_sample=True, temperature=0.1, top_p=0.15, top_k=0, repetition_penalty=1.1)
 print(tokenizer.decode(outputs[0]))
