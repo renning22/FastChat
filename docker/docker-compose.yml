@@ -9,7 +9,7 @@ services:
     ports:
       - "21001:21001"
     entrypoint: ["python3.9", "-m", "fastchat.serve.controller", "--host", "0.0.0.0", "--port", "21001"]
-  fastchat-model-worker:
+  fastchat-model-worker-1:
     build:
       context: .
       dockerfile: Dockerfile
@@ -22,9 +22,25 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: 2
+              device_ids: ['0']
               capabilities: [gpu]
-    entrypoint: ["python3.9", "-m", "fastchat.serve.model_worker", "--num-gpus", "2", "--model-path", "/data/ml/llm/OpenCodeInterpreter-DS-1.3B", "--worker-address", "http://fastchat-model-worker:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
+    entrypoint: ["python3.9", "-m", "fastchat.serve.model_worker", "--num-gpus", "1", "--model-path", "/data/ml/llm/OpenCodeInterpreter-DS-1.3B", "--worker-address", "http://fastchat-model-worker-1:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
+  fastchat-model-worker-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - huggingface:/root/.cache/huggingface
+      - /data/ml/llm:/data/ml/llm
+    image: fastchat:latest
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['1']
+              capabilities: [gpu]
+    entrypoint: ["python3.9", "-m", "fastchat.serve.model_worker", "--num-gpus", "1", "--model-path", "/data/ml/llm/OpenCodeInterpreter-DS-1.3B", "--worker-address", "http://fastchat-model-worker-2:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
   fastchat-api-server:
     build:
       context: .
