@@ -1,0 +1,23 @@
+services:
+  fastchat-controller:
+    image: renning22/dedev-inference:latest
+    ports:
+      - "21001:21001"
+    entrypoint: ["python3.9", "-m", "fastchat.serve.controller", "--host", "0.0.0.0", "--port", "21001"]
+  fastchat-model-worker-0:
+    volumes:
+      - /data/huggingface:/data/huggingface
+    image: renning22/dedev-inference:latest
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [gpu]
+    entrypoint: ["python3.9", "-m", "fastchat.serve.vllm_worker", "--max-model-len=16384", "--model", "microsoft/Phi-3-mini-128k-instruct", "--worker-address", "http://fastchat-model-worker-0:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
+  fastchat-api-server:
+    image: renning22/dedev-inference:latest
+    ports:
+      - "8000:8000"
+    entrypoint: ["python3.9", "-m", "fastchat.serve.openai_api_server", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "8000"]
