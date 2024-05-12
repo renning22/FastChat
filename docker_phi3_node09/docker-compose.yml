@@ -8,74 +8,15 @@ services:
     volumes:
       - /data/huggingface:/data/huggingface
     image: renning22/dedev-inference:latest
+    shm_size: '10gb' 
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: ['0']
+              device_ids: ['0', '1', '2', '3']
               capabilities: [gpu]
-    entrypoint: ["python3", "-m", "fastchat.serve.vllm_worker", "--model-path", "microsoft/Phi-3-mini-4k-instruct", "--worker-address", "http://fastchat-model-worker-0:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
-  fastchat-model-worker-1:
-    volumes:
-      - /data/huggingface:/data/huggingface
-    image: renning22/dedev-inference:latest
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: ['1']
-              capabilities: [gpu]
-    entrypoint: ["python3", "-m", "fastchat.serve.vllm_worker", "--model-path", "microsoft/Phi-3-mini-4k-instruct", "--worker-address", "http://fastchat-model-worker-1:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
-  fastchat-model-worker-2:
-    volumes:
-      - /data/huggingface:/data/huggingface
-    image: renning22/dedev-inference:latest
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: ['2']
-              capabilities: [gpu]
-    entrypoint: ["python3", "-m", "fastchat.serve.vllm_worker", "--model-path", "microsoft/Phi-3-mini-4k-instruct", "--worker-address", "http://fastchat-model-worker-2:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
-  fastchat-model-worker-3:
-    volumes:
-      - /data/huggingface:/data/huggingface
-    image: renning22/dedev-inference:latest
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: ['3']
-              capabilities: [gpu]
-    entrypoint: ["python3", "-m", "fastchat.serve.vllm_worker", "--model-path", "microsoft/Phi-3-mini-4k-instruct", "--worker-address", "http://fastchat-model-worker-3:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
-  fastchat-model-worker-4:
-    volumes:
-      - /data/huggingface:/data/huggingface
-    image: renning22/dedev-inference:latest
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: ['4']
-              capabilities: [gpu]
-    entrypoint: ["python3", "-m", "fastchat.serve.vllm_worker", "--model-path", "microsoft/Phi-3-mini-4k-instruct", "--worker-address", "http://fastchat-model-worker-4:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
-  fastchat-model-worker-5:
-    volumes:
-      - /data/huggingface:/data/huggingface
-    image: renning22/dedev-inference:latest
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: ['5']
-              capabilities: [gpu]
-    entrypoint: ["python3", "-m", "fastchat.serve.vllm_worker", "--model-path", "microsoft/Phi-3-mini-4k-instruct", "--worker-address", "http://fastchat-model-worker-5:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
+    entrypoint: ["python3", "-m", "fastchat.serve.vllm_worker", "--enforce-eager", "--max-model-len=102400", "--num-gpus=4", "--model-path", "microsoft/Phi-3-mini-128k-instruct", "--worker-address", "http://fastchat-model-worker-0:21002", "--controller-address", "http://fastchat-controller:21001", "--host", "0.0.0.0", "--port", "21002"]
   fastchat-api-server:
     image: renning22/dedev-inference:latest
     ports:
